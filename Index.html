@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Block Puzzle Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Game Board -->
+  <div id="game-container">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <!-- Skor -->
+  <div id="score-container">
+    Skor: <span id="score">0</span>
+  </div>
+
+  <!-- Kontrol -->
+  <div id="controls">
+    <button onclick="restartGame()">🔄 Restart</button>
+    <button onclick="toggleMusic()">🎵 Musik</button>
+  </div>
+
+  <!-- Pilihan blok -->
+  <div id="piece-container"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>
