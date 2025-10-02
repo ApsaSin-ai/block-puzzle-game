@@ -48,7 +48,7 @@ function drawPiece(piece, x, y, color = "#ff7f50") {
 // spawn piece baru
 function spawnPiece() {
   const idx = Math.floor(Math.random() * pieces.length);
-  return { ...pieces[idx], x: 0, y: 0, pixelX: 0, pixelY: 0 };
+  return { ...pieces[idx], pixelX: 0, pixelY: 0 };
 }
 
 // check apakah piece bisa ditempatkan
@@ -92,7 +92,7 @@ function getMousePos(e) {
 function startDrag(e) {
   e.preventDefault();
   dragging = true;
-  currentPiece = spawnPiece();
+  if (!currentPiece) currentPiece = spawnPiece();
 
   const pos = getMousePos(e);
   if (e.touches) {
@@ -130,7 +130,7 @@ function endDrag(e) {
   const gridY = Math.floor(currentPiece.pixelY / cellSize);
 
   if (placePiece(currentPiece, gridX, gridY)) {
-    currentPiece = spawnPiece(); // spawn piece baru setelah tempatkan
+    currentPiece = spawnPiece();
   }
   draw();
 }
@@ -146,7 +146,7 @@ function draw() {
   }
 }
 
-// Event listeners
+// event listeners
 canvas.addEventListener("mousedown", startDrag);
 canvas.addEventListener("mousemove", handleDrag);
 canvas.addEventListener("mouseup", endDrag);
@@ -155,7 +155,7 @@ canvas.addEventListener("touchstart", startDrag);
 canvas.addEventListener("touchmove", handleDrag);
 canvas.addEventListener("touchend", endDrag);
 
-// **spawn piece pertama agar blok terlihat saat load**
+// spawn pertama setelah halaman load
 window.addEventListener("load", () => {
   currentPiece = spawnPiece();
   draw();
