@@ -156,5 +156,7 @@ canvas.addEventListener("touchmove", handleDrag);
 canvas.addEventListener("touchend", endDrag);
 
 // **spawn piece pertama agar blok terlihat saat load**
-currentPiece = spawnPiece();
-draw();
+window.addEventListener("load", () => {
+  currentPiece = spawnPiece();
+  draw();
+});
