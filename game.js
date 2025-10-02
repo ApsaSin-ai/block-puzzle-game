@@ -9,7 +9,14 @@ canvas.height = rows * cellSize;
 
 let grid = Array.from({ length: rows }, () => Array(cols).fill(0));
 let currentPiece = null;
-let previewGrid = null;
+let dragging = false;
+
+// contoh beberapa piece
+const pieces = [
+  { shape: [[1, 1, 1]] },
+  { shape: [[1], [1], [1]] },
+  { shape: [[1, 1], [1, 1]] }
+];
 
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -25,117 +32,129 @@ function drawGrid() {
   }
 }
 
-function drawPiece(piece, gridPos, color = "rgba(0,0,0,0.3)") {
+// draw piece di gridPos
+function drawPiece(piece, x, y, color = "#ff7f50") {
   piece.shape.forEach((row, dy) => {
     row.forEach((val, dx) => {
       if (val) {
         ctx.fillStyle = color;
-        ctx.fillRect(
-          (gridPos.x + dx) * cellSize,
-          (gridPos.y + dy) * cellSize,
-          cellSize,
-          cellSize
-        );
+        ctx.fillRect((x + dx) * cellSize, (y + dy) * cellSize, cellSize, cellSize);
       }
     });
   });
 }
 
-function placePiece(piece, gridPos) {
-  if (canPlace(piece, gridPos)) {
-    piece.shape.forEach((row, dy) => {
-      row.forEach((val, dx) => {
-        if (val) {
-          grid[gridPos.y + dy][gridPos.x + dx] = 1;
-        }
-      });
-    });
-    return true;
-  }
-  return false;
+// spawn piece baru
+function spawnPiece() {
+  const idx = Math.floor(Math.random() * pieces.length);
+  return { ...pieces[idx], x: 0, y: 0 };
 }
 
-function canPlace(piece, gridPos) {
+// check bisa ditempatkan di grid
+function canPlace(piece, x, y) {
   return piece.shape.every((row, dy) =>
     row.every((val, dx) => {
       if (!val) return true;
-      let x = gridPos.x + dx;
-      let y = gridPos.y + dy;
-      return x >= 0 && x < cols && y >= 0 && y < rows && !grid[y][x];
+      const gx = x + dx;
+      const gy = y + dy;
+      return gx >= 0 && gx < cols && gy >= 0 && gy < rows && !grid[gy][gx];
     })
   );
 }
 
-function spawnPiece() {
-  const pieces = [
-    { shape: [[1, 1, 1]] },
-    { shape: [[1], [1], [1]] },
-    { shape: [[1, 1], [1, 1]] }
-  ];
-  return pieces[Math.floor(Math.random() * pieces.length)];
+// tempatkan piece di grid
+function placePiece(piece, x, y) {
+  if (!canPlace(piece, x, y)) return false;
+  piece.shape.forEach((row, dy) => {
+    row.forEach((val, dx) => {
+      if (val) grid[y + dy][x + dx] = 1;
+    });
+  });
+  return true;
 }
 
-function update() {
-  drawGrid();
-  if (currentPiece && previewGrid) {
-    // shadow
-    drawPiece(currentPiece, previewGrid, "rgba(0,0,0,0.2)");
-    // current piece
-    drawPiece(currentPiece, currentPiece.gridPos, "#ff7f50");
-  }
-}
-
-function getGridPosFromMouse(e) {
+// hitung koordinat grid dari mouse/touch
+function getMousePos(e) {
   const rect = canvas.getBoundingClientRect();
-  const clientX = e.clientX || e.pageX;
-  const clientY = e.clientY || e.pageY;
-  const x = Math.floor((clientX - rect.left) / cellSize);
-  const y = Math.floor((clientY - rect.top) / cellSize);
-  return { x, y };
+  let clientX, clientY;
+  if (e.touches) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top
+  };
 }
 
 function startDrag(e) {
+  e.preventDefault();
+  dragging = true;
   currentPiece = spawnPiece();
-  const pos = getGridPosFromMouse(e);
-  currentPiece.gridPos = pos;
-  previewGrid = { ...pos };
-  update();
+
+  const pos = getMousePos(e);
+  if (e.touches) {
+    currentPiece.pixelX = pos.x;
+    currentPiece.pixelY = pos.y;
+  } else {
+    currentPiece.pixelX = pos.x - (currentPiece.shape[0].length * cellSize) / 2;
+    currentPiece.pixelY = pos.y - (currentPiece.shape.length * cellSize) / 2;
+  }
+  draw();
 }
 
 function handleDrag(e) {
-  if (!currentPiece) return;
-  const pos = getGridPosFromMouse(e);
-  currentPiece.gridPos = pos;
-  previewGrid = { ...pos };
-  update();
+  if (!dragging || !currentPiece) return;
+  e.preventDefault();
+  const pos = getMousePos(e);
+  if (e.touches) {
+    currentPiece.pixelX = pos.x;
+    currentPiece.pixelY = pos.y;
+  } else {
+    currentPiece.pixelX = pos.x - (currentPiece.shape[0].length * cellSize) / 2;
+    currentPiece.pixelY = pos.y - (currentPiece.shape.length * cellSize) / 2;
+  }
+  draw();
 }
 
 function endDrag(e) {
-  if (!currentPiece) return;
-  if (placePiece(currentPiece, currentPiece.gridPos)) {
+  if (!dragging || !currentPiece) return;
+  e.preventDefault();
+  dragging = false;
+
+  // hitung posisi grid dari pixel
+  const gridX = Math.floor(currentPiece.pixelX / cellSize);
+  const gridY = Math.floor(currentPiece.pixelY / cellSize);
+
+  if (placePiece(currentPiece, gridX, gridY)) {
     currentPiece = null;
-    previewGrid = null;
   }
-  update();
+  draw();
 }
 
+function draw() {
+  drawGrid();
+  if (currentPiece) {
+    // shadow di grid
+    const shadowX = Math.floor(currentPiece.pixelX / cellSize);
+    const shadowY = Math.floor(currentPiece.pixelY / cellSize);
+    drawPiece(currentPiece, shadowX, shadowY, "rgba(0,0,0,0.2)");
+    // piece actual
+    drawPiece(currentPiece, Math.floor(currentPiece.pixelX / cellSize), Math.floor(currentPiece.pixelY / cellSize), "#ff7f50");
+  }
+}
+
+// Event listeners
 canvas.addEventListener("mousedown", startDrag);
 canvas.addEventListener("mousemove", handleDrag);
 canvas.addEventListener("mouseup", endDrag);
 
-// HP (touch support)
-canvas.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  startDrag(e.touches[0]);
-});
-canvas.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  handleDrag(e.touches[0]);
-});
-canvas.addEventListener("touchend", (e) => {
-  e.preventDefault();
-  endDrag(e.changedTouches[0]);
-});
+canvas.addEventListener("touchstart", startDrag);
+canvas.addEventListener("touchmove", handleDrag);
+canvas.addEventListener("touchend", endDrag);
 
 // init draw
-update();
+draw();
