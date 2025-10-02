@@ -11,13 +11,14 @@ let grid = Array.from({ length: rows }, () => Array(cols).fill(0));
 let currentPiece = null;
 let dragging = false;
 
-// contoh beberapa piece
+// beberapa tipe piece
 const pieces = [
   { shape: [[1, 1, 1]] },
   { shape: [[1], [1], [1]] },
   { shape: [[1, 1], [1, 1]] }
 ];
 
+// draw grid
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let y = 0; y < rows; y++) {
@@ -32,7 +33,7 @@ function drawGrid() {
   }
 }
 
-// draw piece di gridPos
+// draw piece di grid
 function drawPiece(piece, x, y, color = "#ff7f50") {
   piece.shape.forEach((row, dy) => {
     row.forEach((val, dx) => {
@@ -47,10 +48,10 @@ function drawPiece(piece, x, y, color = "#ff7f50") {
 // spawn piece baru
 function spawnPiece() {
   const idx = Math.floor(Math.random() * pieces.length);
-  return { ...pieces[idx], x: 0, y: 0 };
+  return { ...pieces[idx], x: 0, y: 0, pixelX: 0, pixelY: 0 };
 }
 
-// check bisa ditempatkan di grid
+// check apakah piece bisa ditempatkan
 function canPlace(piece, x, y) {
   return piece.shape.every((row, dy) =>
     row.every((val, dx) => {
@@ -73,7 +74,7 @@ function placePiece(piece, x, y) {
   return true;
 }
 
-// hitung koordinat grid dari mouse/touch
+// koordinat mouse / touch
 function getMousePos(e) {
   const rect = canvas.getBoundingClientRect();
   let clientX, clientY;
@@ -84,12 +85,10 @@ function getMousePos(e) {
     clientX = e.clientX;
     clientY = e.clientY;
   }
-  return {
-    x: clientX - rect.left,
-    y: clientY - rect.top
-  };
+  return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
+// mulai drag
 function startDrag(e) {
   e.preventDefault();
   dragging = true;
@@ -97,15 +96,18 @@ function startDrag(e) {
 
   const pos = getMousePos(e);
   if (e.touches) {
+    // HP: block nempel pojok kiri atas
     currentPiece.pixelX = pos.x;
     currentPiece.pixelY = pos.y;
   } else {
+    // Desktop: block center di mouse
     currentPiece.pixelX = pos.x - (currentPiece.shape[0].length * cellSize) / 2;
     currentPiece.pixelY = pos.y - (currentPiece.shape.length * cellSize) / 2;
   }
   draw();
 }
 
+// saat drag
 function handleDrag(e) {
   if (!dragging || !currentPiece) return;
   e.preventDefault();
@@ -120,12 +122,12 @@ function handleDrag(e) {
   draw();
 }
 
+// akhir drag
 function endDrag(e) {
   if (!dragging || !currentPiece) return;
   e.preventDefault();
   dragging = false;
 
-  // hitung posisi grid dari pixel
   const gridX = Math.floor(currentPiece.pixelX / cellSize);
   const gridY = Math.floor(currentPiece.pixelY / cellSize);
 
@@ -135,19 +137,20 @@ function endDrag(e) {
   draw();
 }
 
+// redraw semua
 function draw() {
   drawGrid();
   if (currentPiece) {
-    // shadow di grid
+    // shadow
     const shadowX = Math.floor(currentPiece.pixelX / cellSize);
     const shadowY = Math.floor(currentPiece.pixelY / cellSize);
     drawPiece(currentPiece, shadowX, shadowY, "rgba(0,0,0,0.2)");
-    // piece actual
+    // actual piece
     drawPiece(currentPiece, Math.floor(currentPiece.pixelX / cellSize), Math.floor(currentPiece.pixelY / cellSize), "#ff7f50");
   }
 }
 
-// Event listeners
+// event listeners
 canvas.addEventListener("mousedown", startDrag);
 canvas.addEventListener("mousemove", handleDrag);
 canvas.addEventListener("mouseup", endDrag);

@@ -18,7 +18,7 @@ canvas {
   border: 2px solid #444;
   background: #fff;
   margin: 20px 0;
-  touch-action: none; /* penting biar touch drag lancar */
+  touch-action: none; /* penting untuk drag di HP */
 }
 
 .controls {
