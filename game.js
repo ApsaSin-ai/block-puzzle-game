@@ -96,11 +96,9 @@ function startDrag(e) {
 
   const pos = getMousePos(e);
   if (e.touches) {
-    // HP: block nempel pojok kiri atas
     currentPiece.pixelX = pos.x;
     currentPiece.pixelY = pos.y;
   } else {
-    // Desktop: block center di mouse
     currentPiece.pixelX = pos.x - (currentPiece.shape[0].length * cellSize) / 2;
     currentPiece.pixelY = pos.y - (currentPiece.shape.length * cellSize) / 2;
   }
@@ -132,7 +130,7 @@ function endDrag(e) {
   const gridY = Math.floor(currentPiece.pixelY / cellSize);
 
   if (placePiece(currentPiece, gridX, gridY)) {
-    currentPiece = null;
+    currentPiece = spawnPiece(); // spawn piece baru setelah tempatkan
   }
   draw();
 }
@@ -141,16 +139,14 @@ function endDrag(e) {
 function draw() {
   drawGrid();
   if (currentPiece) {
-    // shadow
     const shadowX = Math.floor(currentPiece.pixelX / cellSize);
     const shadowY = Math.floor(currentPiece.pixelY / cellSize);
     drawPiece(currentPiece, shadowX, shadowY, "rgba(0,0,0,0.2)");
-    // actual piece
     drawPiece(currentPiece, Math.floor(currentPiece.pixelX / cellSize), Math.floor(currentPiece.pixelY / cellSize), "#ff7f50");
   }
 }
 
-// event listeners
+// Event listeners
 canvas.addEventListener("mousedown", startDrag);
 canvas.addEventListener("mousemove", handleDrag);
 canvas.addEventListener("mouseup", endDrag);
@@ -159,5 +155,6 @@ canvas.addEventListener("touchstart", startDrag);
 canvas.addEventListener("touchmove", handleDrag);
 canvas.addEventListener("touchend", endDrag);
 
-// init draw
+// **spawn piece pertama agar blok terlihat saat load**
+currentPiece = spawnPiece();
 draw();
