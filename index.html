@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,26 +7,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Game Board -->
-  <div id="game-container">
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <h1>Block Puzzle Game</h1>
+  <canvas id="gameCanvas"></canvas>
+
+  <div class="controls">
+    <button id="restartBtn">Restart</button>
+    <button id="musicBtn">Music On/Off</button>
   </div>
 
-  <!-- Skor -->
-  <div id="score-container">
-    Skor: <span id="score">0</span>
-  </div>
-
-  <!-- Kontrol -->
-  <div id="controls">
-    <button onclick="restartGame()">🔄 Restart</button>
-    <button onclick="toggleMusic()">🎵 Musik</button>
-  </div>
-
-  <!-- Pilihan blok -->
-  <div id="piece-container"></div>
-
-  <script src="game.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
-
