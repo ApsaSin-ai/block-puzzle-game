@@ -2,50 +2,28 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #f7f7f7;
-  font-family: Arial, sans-serif;
+  justify-content: flex-start;
+  min-height: 100vh;
   margin: 0;
-  padding: 0;
+  font-family: sans-serif;
+  background: #f5f5f5;
 }
 
-h1 {
+#gameCanvas {
+  border: 2px solid #ccc;
   margin-top: 20px;
-  color: #444;
+  touch-action: none; /* penting untuk touch drag */
 }
 
-canvas {
-  border: 2px solid #444;
-  background: #fff;
-  margin: 20px 0;
-  touch-action: none;
-}
-
-.preview-container {
+.previews {
   display: flex;
+  margin-top: 20px;
   gap: 10px;
-  margin-bottom: 20px;
 }
 
-.preview {
-  width: 120px;
-  height: 120px;
-}
-
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  background: #4cafef;
-  color: white;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #379bd6;
+canvas.preview {
+  border: 1px solid #aaa;
+  width: 90px;
+  height: 90px;
+  touch-action: none; /* cegah scroll saat drag */
 }
